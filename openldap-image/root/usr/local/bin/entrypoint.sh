@@ -46,20 +46,18 @@ IFS=","; declare -a admin_user_parts=($SLAPD_ADMIN_USER); unset IFS
 
 base_string="BASE ${dc_string:1}"
 suffix_string="suffix \"${dc_string:1}\""
-rootdn_string="rootdn \"${SLAPD_ADMIN_USER}\""
 
 password=`cat $SLAPD_PASSWORD_FILE`
 password_hash=`slappasswd -s "${password}"`
-rootpwd_string="rootpw ${password_hash}"
 
 echo "Copying configuration templates"
 cp -f $SLAPD_CONF_TEMPLATE $SLAPD_CONF
 cp -f $LDAP_CONF_TEMPLATE $LDAP_CONF
 
 echo "Setting up $SLAPD_CONF configuration file"
-sed -i "s|^suffix.*|${suffix_string}|g" $SLAPD_CONF
-sed -i "s|^rootdn.*|${rootdn_string}|g" $SLAPD_CONF
-sed -i "s|^rootpw.*|${rootpwd_string}|g" $SLAPD_CONF
+sed -i "s|@SUFFIX@|${dc_string:1}|g" $SLAPD_CONF
+sed -i "s|@ROOTDN@|${SLAPD_ADMIN_USER}|g" $SLAPD_CONF
+sed -i "s|@ROOTPW@|${password_hash}|g" $SLAPD_CONF
 
 if [ -n "$SLAPD_TLS_ENABLED" ]; then
     echo "Configuring TLS support in $SLAPD_CONF"
